@@ -1,5 +1,4 @@
 const express = require('express');
-const Vue = require('vue');
 
 const fs = require('fs');
 const path = require('path');
@@ -10,16 +9,17 @@ const renderer = createRenderer({
   template: fs.readFileSync(path.join(__dirname, './index.html'), 'utf-8'),
 });
 
-const VueApp = require('./src/app');
-
 const app = express();
 
-app.get('*', (req, res) => {
+const VueApp = require('./src/app');
+
+app.get('*', async (req, res) => {
   res.setHeader('Content-Type', 'text/html;charset=utf-8;');
 
-  const html = VueApp({
-    url: req.url,
-  });
+  const { app, router } = await VueApp({ url: req.url });
+  const html = app;
+
+  router.push(req.url);
 
   renderer.renderToString(html).then(html => {
     res.end(`
